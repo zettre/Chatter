@@ -1,0 +1,22 @@
+{
+  "name": "chatter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vaibhav",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.17.0",
+    "ejs": "^2.5.6",
+    "ejs-mate": "^2.3.0",
+    "express": "^4.14.1",
+    "faker": "^4.1.0",
+    "mongoose": "^4.8.5",
+    "morgan": "^1.8.1",
+    "socket.io": "^1.7.3"
+  }
+}
