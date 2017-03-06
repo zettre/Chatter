@@ -1,3 +1,7 @@
+body
+{
+    overflow: hidden;
+}
 .container
 {
 	height: 100%;
@@ -22,8 +26,6 @@
 .chat-window
 {
 		background-image: url(../images/background.jpg);
-        height: 530px;
-
 }
 .nav-wrapper
 {
