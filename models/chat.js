@@ -5,6 +5,7 @@ var ChatSchema=new Schema({
 	from:String,
 	to:String,
 	message:String,
+	isRead:Boolean,
 	time:{type:Date, default:Date.now()}
 });
 

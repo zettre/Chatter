@@ -58,12 +58,15 @@ io.on('connection', function(socket){
   		chat.from=data.from;
   		chat.message=data.message;
   		chat.time=new Date().getTime();
+      chat.isRead=false;
   		chat.save(function(error,newChat){
   			if(error) console.log(error);
-  			if(users[chat.to])
-  			users[chat.to].emit('message',newChat);
+	  		if(users[chat.to])
+	        {
+	          users[chat.to].emit('message',newChat);
+	        }
   		});
-	});
+	  });
   	
   	socket.on('disconnect', function () {
   		delete users.user;
@@ -90,9 +93,35 @@ app.get('/chat-window/:username',function(req,res,next){
 });
 
 app.post('/chats',function(req,res,next){
-	Chat.find({$and:[{$or:[{from:req.body.user},{from:req.body.friend}]},{$or:[{to:req.body.user},{to:req.body.friend}]}]},function(error,chats){
+	var user=req.body.user;
+	var friend=req.body.friend;
+	Chat.find({$and:[{$or:[{from:user},{from:friend}]},{$or:[{to:user},{to:friend}]}]},function(error,chats){
+    if(error) return next(error);
 			res.json(chats);		
 	});
+});
+
+app.post('/chats/set-read',function(req,res,next){
+  var user=req.body.user;
+  var friend=req.body.friend;
+  var data={};
+  data["user"]=user;
+  data["friend"]=friend;
+  Chat.find({from:friend,to:user,isRead:false},function(error,chats){
+    if(error) return next(error);
+    chats.forEach(function(chat){
+      chat.isRead=true;
+      chat.save();
+    });
+    res.json(data);
+  });
+});
+
+app.get('/unread-chats/:username',function(req,res,next){
+  Chat.find({to:req.params.username,isRead:false},function(error,chats){
+    if(error) return next(error);
+    res.json(chats);
+  });
 });
 
 app.get('/',function(req,res,next){
