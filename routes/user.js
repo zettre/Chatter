@@ -1,6 +1,6 @@
 var router=require('express').Router();
 var multer=require('multer');
-
+var fs=require('fs');
 var User=require('../models/user');
 var Chat=require('../models/chat');
 
@@ -63,7 +63,7 @@ router.post('/signup',function(req,res,next){
 	user.username=req.body.username;
 	user.email=req.body.email;
 	user.password=req.body.password;
-	user.image="/images/profile.jpg";
+	user.image="/images/profile.png";
 	if(!(req.body.name && req.body.username && req.body.email && req.body.password))
 	{
 		req.flash('message','Please Complete All The Fields!');
@@ -87,5 +87,43 @@ router.post('/signup',function(req,res,next){
 	});
 });
 
+router.get('/edit-profile/:username',function(req,res,next){
+	User.findOne({username:req.params.username},function(error,user){
+		if(error) return next(error);
+		res.render('user/edit-profile',{user:user,message:req.flash('message')});
+	});
+});
+
+router.post('/edit-profile/:username',function(req,res,next){
+	upload(req,res,function(error){
+		if(error) 
+		{
+	        return next(error);
+	    }
+		var picture=null;
+		if(typeof req.file!=='undefined'){ 
+			picture="/uploads/"+req.file.filename;
+		}
+
+		User.findOne({username:req.params.username},function(error,user){
+			if(error) return next(error);
+			if(req.body.name) user.name=req.body.name;
+			if(picture){ 
+				if(fs.existsSync("C:/project/chatter/public"+user.image) && user.image!=="/images/profile.png")
+					fs.unlink("C:/project/chatter/public"+user.image);
+				user.image=picture; 
+			}
+			user.save(function(error,user){
+				if(error) return next(error);
+				req.flash('success','Successfully Edited Profile.');
+				return res.redirect('/chat-window/'+req.params.username);
+			});
+		});
+	});
+});
+
+router.get('/logout',function(req,res,next){
+	return res.redirect('/');
+});
 
 module.exports=router;

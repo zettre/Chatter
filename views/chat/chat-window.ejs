@@ -23,7 +23,8 @@
       <%= user.username %>
     </div>
     <ul class="right">
-      <li><a href="/edit-profile"><i class="material-icons">edit</i></a></li>
+      <li><a href="/logout">logout</a></li>
+      <li><a href="/edit-profile/<%= user.username %>"><i class="material-icons">edit</i></a></li>
     </ul>
   </div>
 </nav>

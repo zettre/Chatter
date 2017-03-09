@@ -6,11 +6,11 @@ var ejs=require('ejs');
 var engine=require('ejs-mate');
 var morgan=require('morgan');
 var mongoose=require('mongoose');
-var faker=require('faker');
 var bodyParser=require('body-parser');
 var session=require('express-session');
 var cookieParser=require('cookie-parser');
 var flash=require('express-flash');
+var MongoStore=require('connect-mongo')(session);
 
 var secret=require('./config/conf');
 var User=require('./models/user');
@@ -35,11 +35,12 @@ app.use(cookieParser());
 app.use(session({
 	resave:true,
 	saveUninitialized:true,
-	secret:"abc123",
+	secret:secret.secretKey,
 }));
 app.use(flash());
 app.engine('ejs',engine);
 app.set('view engine','ejs');
+
 
 var userRoutes=require('./routes/user');
 app.use(userRoutes);
@@ -103,6 +104,6 @@ app.get('/',function(req,res,next){
 
 
 
-server.listen(3000,function(){
+server.listen(secret.port,function(){
 	console.log("Server Listening on Port 3000...");
 });
