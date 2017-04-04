@@ -73,7 +73,7 @@ io.on('connection', function(socket){
   		chat.from=data.from;
   		chat.message=data.message;
   		chat.time=new Date().getTime();
-      chat.isRead=false;
+      	chat.isRead=false;
   		chat.save(function(error,newChat){
   			if(error) console.log(error);
 	  		if(users[chat.to])
@@ -81,10 +81,10 @@ io.on('connection', function(socket){
 	          users[chat.to].emit('message',newChat);
 	        }
   		});
-	  });
+	});
   	
   	socket.on('disconnect', function () {
-  		delete users.user;
+  		delete users[user];
   		for(var key in users)
   		{
   			if(key!==user)
