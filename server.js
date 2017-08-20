@@ -79,6 +79,11 @@ io.on('connection', function(socket){
 	  		if(users[chat.to])
 	        {
 	          users[chat.to].emit('message',newChat);
+            //newChat.isRead=true;
+            //newChat.save(function(err,finalChat){
+              //if(err) console.log(err);
+
+            //});
 	        }
   		});
 	});
