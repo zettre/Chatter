@@ -3,7 +3,8 @@ var multer=require('multer');
 var fs=require('fs');
 var User=require('../models/user');
 var Chat=require('../models/chat');
-
+var users=require('../data/users');
+var support=require('../utility/support');
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, './public/uploads');
@@ -15,7 +16,13 @@ var storage =   multer.diskStorage({
 var upload = multer({ storage : storage}).single('file');
 
 router.get('/login',function(req,res,next){
-	res.render('user/login',{message:req.flash('message')});
+	if(!req.session.user_id)
+		res.render('user/login',{message:req.flash('message')});
+	else
+		User.findOne({_id:req.session.user_id},function(error,user){
+			if(error) next(error);
+			return res.redirect('/chat-window/'+user.username);		
+		});
 });
 
 router.post('/login',function(req,res,next){
@@ -41,6 +48,8 @@ router.post('/login',function(req,res,next){
 		user.password=existingUser.password;
 		if(user.comparePassword(password))
 		{
+			if(!req.session.user_id)
+			req.session.user_id=existingUser._id;
 			return res.redirect('/chat-window/'+username);
 		}
 		else
@@ -52,9 +61,13 @@ router.post('/login',function(req,res,next){
 });
 
 router.get('/signup',function(req,res){
-	res.render('user/signup',{
-		message: req.flash('message')
-	});
+	if(!req.session.user_id)
+		res.render('user/signup',{message:req.flash('message')});
+	else
+		User.findOne({_id:req.session.user_id},function(error,user){
+			if(error) next(error);
+			return res.redirect('/chat-window/'+user.username);		
+		});
 });
 
 router.post('/signup',function(req,res,next){
@@ -78,23 +91,33 @@ router.post('/signup',function(req,res,next){
 		}
 		else
 		{
-			user.save(function(error,user){
+			user.save(function(error,usr){
 				if(error) return next(error);
-				var url='/chat-window/'+user.username;
-				return res.redirect(url);				
+				users.getAllUser(function(users){
+				for(var u in users)
+				{
+					if(u!==usr.username)
+					{
+						users[u].emit("newUserRegistered",usr);						
+					}
+				}					
+				});
+				if(!req.session.user_id)
+				req.session.user_id=existingUser._id;
+				return res.redirect('/chat-window/'+user.username);
 			});
 		}
 	});
 });
 
-router.get('/edit-profile/:username',function(req,res,next){
+router.get('/edit-profile/:username',support.checkAuth,function(req,res,next){
 	User.findOne({username:req.params.username},function(error,user){
 		if(error) return next(error);
 		res.render('user/edit-profile',{user:user,message:req.flash('message')});
 	});
 });
 
-router.post('/edit-profile/:username',function(req,res,next){
+router.post('/edit-profile/:username',support.checkAuth,function(req,res,next){
 	upload(req,res,function(error){
 		if(error) 
 		{
@@ -113,8 +136,18 @@ router.post('/edit-profile/:username',function(req,res,next){
 					fs.unlink("C:/project/chatter/public"+user.image);
 				user.image=picture; 
 			}
-			user.save(function(error,user){
+			user.save(function(error,usr){
 				if(error) return next(error);
+				users.getAllUser(function(users){
+				for(var u in users)
+				{
+					if(u!==usr.username)
+					{
+						users[u].emit("profilePicEdited",usr);						
+					}
+				}					
+				});
+
 				req.flash('success','Successfully Edited Profile.');
 				return res.redirect('/chat-window/'+req.params.username);
 			});
@@ -122,7 +155,8 @@ router.post('/edit-profile/:username',function(req,res,next){
 	});
 });
 
-router.get('/logout',function(req,res,next){
+router.get('/logout',support.checkAuth,function(req,res,next){
+	delete req.session.user_id;
 	return res.redirect('/');
 });
 

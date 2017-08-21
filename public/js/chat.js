@@ -39,6 +39,20 @@ socket.on('userOffline',function(username){
 	$(f).find('#status').html("");
 });
 
+socket.on('profilePicEdited',function(user){
+	var f="#"+user.username;
+	$(f).find('#profile-pic').attr('src',user.image);
+});
+
+socket.on('newUserRegistered',function(user){
+	$('#list').prepend('<a class="collection-item" id="'+user.username+'"><img class="profile pull-left" id="profile-pic" src="'+user.image+'" /><p class="profile-name" id="username">'+user.username+'</p>'+user.name+'<span class="badge green" id="newMessage"></span><span class="badge" id="status"></span></a>');
+});
+
+$('#list').on("click",".collection-item",function(){
+	  friend=$(this).find("p").text();
+      fillChatArea(user,friend);
+      setMessageRead(user,friend);
+});
 
 function setNewMessages(user)
 {
@@ -192,9 +206,9 @@ $('#messageText').keypress(function(e){
 });
 
 $('#friend').click(function(){
-	if(friend)
-	alert();
 });
+
+
 
 
 });

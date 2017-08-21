@@ -1,9 +1,9 @@
 var router=require('express').Router();
-
+var support=require('../utility/support');
 var User=require('../models/user');
 var Chat=require('../models/chat');
 
-router.get('/chat-window/:username',function(req,res,next){
+router.get('/chat-window/:username',support.checkAuth,function(req,res,next){
 	User.find({},function(error,users){
 		if(error) return next(error);
 		User.findOne({username:req.params.username},function(err,user){

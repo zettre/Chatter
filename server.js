@@ -8,9 +8,9 @@ var morgan=require('morgan');
 var mongoose=require('mongoose');
 var bodyParser=require('body-parser');
 var session=require('express-session');
-var cookieParser=require('cookie-parser');
+//var cookieParser=require('cookie-parser');
 var flash=require('express-flash');
-var MongoStore=require('connect-mongo')(session);
+//var MongoStore=require('connect-mongo')(session);
 
 var secret=require('./config/conf');
 var User=require('./models/user');
@@ -31,7 +31,8 @@ app.use(express.static(__dirname+"/public"));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
-app.use(cookieParser());
+
+//app.use(cookieParser());
 app.use(session({
 	resave:true,
 	saveUninitialized:true,
@@ -47,24 +48,28 @@ app.use(userRoutes);
 var chatRoutes=require('./routes/chat');
 app.use(chatRoutes);
 
-var users={};
+
+var users=require('./data/users');
 
 io.on('connection', function(socket){
 	
-	var user=null;
+	var username=null;
 
   	socket.on('username',function(u){
-  		user=u;
-  		users[user]=socket;
-  		for(var key in users)
+  		username=u;
+  		users.addUser(username,socket);
+  		users.getAllUser(function(usrs){
+  		for(var key in usrs)
   		{
-  			if(key!==user)
+  			if(key!==username)
   			{
-  				users[key].emit('newUserOnline',user);
+  				usrs[key].emit('newUserOnline',username);
   				socket.emit('newUserOnline',key);
   			}
   		}
-  		console.log(user+" connected!");
+  		});
+  		
+  		console.log(username+" connected!");
   	});
 
   	socket.on('message',function(data){
@@ -76,35 +81,39 @@ io.on('connection', function(socket){
       	chat.isRead=false;
   		chat.save(function(error,newChat){
   			if(error) console.log(error);
-	  		if(users[chat.to])
-	        {
-	          users[chat.to].emit('message',newChat);
-            //newChat.isRead=true;
-            //newChat.save(function(err,finalChat){
-              //if(err) console.log(err);
-
-            //});
-	        }
+	  		users.getUser(chat.to,function(user){
+	  			if(user!==null)
+	  				user.emit('message',newChat);
+	  		});
   		});
 	});
   	
   	socket.on('disconnect', function () {
-  		delete users[user];
-  		for(var key in users)
+  		users.removeUser(username);
+  		users.getAllUser(function(usrs){
+  		for(var key in usrs)
   		{
-  			if(key!==user)
+  			if(key!==username)
   			{
-  				users[key].emit('userOffline',user);
+  				usrs[key].emit('userOffline',username);
   			}
-  		}
-    	console.log(user+' disconnected');
+  		}  			
+  		});
+    	console.log(username+' disconnected');
   	});
 
 });
 
 
 app.get('/',function(req,res,next){
-	res.render('main/home');
+	
+	if(!req.session.user_id)
+		res.render('main/home');
+	else
+		User.findOne({_id:req.session.user_id},function(error,user){
+			if(error) next(error);
+			return res.redirect('/chat-window/'+user.username);		
+		});
 });
 
 
@@ -112,3 +121,4 @@ app.get('/',function(req,res,next){
 server.listen(secret.port,function(){
 	console.log("Server Listening on Port 3000...");
 });
+

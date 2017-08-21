@@ -43,7 +43,7 @@
 
 <div class="collection scroll" id="list">
   <% for(var i=0;i<users.length;i++) { if(users[i].username!==user.username) {%>
-    <a class="collection-item" id="<%= users[i].username %>"><img class="profile pull-left" src="<%= users[i].image %>"><p class="profile-name" id="username"><%= users[i].username %></p><%= users[i].name %><span class="badge green" id="newMessage"></span><span class="badge" id="status"></span></a>
+    <a class="collection-item" id="<%= users[i].username %>"><img class="profile pull-left" id="profile-pic" src="<%= users[i].image %>" /><p class="profile-name" id="username"><%= users[i].username %></p><%= users[i].name %><span class="badge green" id="newMessage"></span><span class="badge" id="status"></span></a>
   <% } } %>
 </div>
 
