@@ -167,11 +167,11 @@ function fillChatArea(user,friend)
 }
 
 
-$('.collection-item').click(function(){
+/*$('.collection-item').click(function(){
       friend=$(this).find("p").text();
       fillChatArea(user,friend);
       setMessageRead(user,friend);
-});
+});*/
 
 $('#search').keyup(function(){
 	var query=$('#search').val();

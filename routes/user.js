@@ -103,7 +103,7 @@ router.post('/signup',function(req,res,next){
 				}					
 				});
 				if(!req.session.user_id)
-				req.session.user_id=existingUser._id;
+				req.session.user_id=usr._id;
 				return res.redirect('/chat-window/'+user.username);
 			});
 		}
@@ -119,10 +119,7 @@ router.get('/edit-profile/:username',support.checkAuth,function(req,res,next){
 
 router.post('/edit-profile/:username',support.checkAuth,function(req,res,next){
 	upload(req,res,function(error){
-		if(error) 
-		{
-	        return next(error);
-	    }
+		if(error) return next(error);
 		var picture=null;
 		if(typeof req.file!=='undefined'){ 
 			picture="/uploads/"+req.file.filename;
