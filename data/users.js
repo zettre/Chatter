@@ -4,6 +4,7 @@ var Users=module.exports={
 		Users.users[username]=socket;
 	},
 	removeUser:function(username){
+		if(Users.users[username])
 		delete Users.users[username];
 	},
 	getUser:function(username,callback){

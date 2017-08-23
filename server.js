@@ -59,7 +59,7 @@ app.get('/',function(req,res,next){
 });
 
 app.get('*', function(req, res){
-  res.send('<h1 align="center">Looks like you are in wrong place!</h1><hr><h1 align="center">Error 404</h1>', 404);
+  res.status(404).send('<h1 align="center">Looks like you are in wrong place!</h1><hr><h1 align="center">Error 404</h1>');
 });
 
 server.listen(secret.port,function(){

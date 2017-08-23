@@ -1,10 +1,12 @@
 var router=require('express').Router();
 var multer=require('multer');
 var fs=require('fs');
+var path=require('path');
 var User=require('../models/user');
 var Chat=require('../models/chat');
 var users=require('../data/users');
 var support=require('../utility/support');
+
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, './public/uploads');
@@ -128,9 +130,10 @@ router.post('/edit-profile/:username',support.checkAuth,function(req,res,next){
 		User.findOne({username:req.params.username},function(error,user){
 			if(error) return next(error);
 			if(req.body.name) user.name=req.body.name;
-			if(picture){ 
-				if(fs.existsSync("C:/project/chatter/public"+user.image) && user.image!=="/images/profile.png")
-					fs.unlink("C:/project/chatter/public"+user.image);
+			if(picture){
+				var imagePath=path.join(__dirname,"..","public"); 
+				if(fs.existsSync(imagePath+user.image) && user.image!=="/images/profile.png")
+					fs.unlink(imagePath+user.image);
 				user.image=picture; 
 			}
 			user.save(function(error,usr){
